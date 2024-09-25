@@ -4,6 +4,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 
 from actions_extractor.base import ActionsExtractor
 from actions_extractor.models import Actions, ActionFragment, MeasureType, ActionCategory
+from typing import Optional, List
 
 
 class LLMActionsExtractor(ActionsExtractor):
@@ -25,7 +26,7 @@ class LLMActionsExtractor(ActionsExtractor):
             Return the output as a JSON-object, following this example {format_instructions}."""
         self._output_parser = PydanticOutputParser(pydantic_object=Actions)
 
-    def extract_actions(self, text: str) -> list[ActionFragment]:
+    def extract_actions(self, text: str) -> List[ActionFragment]:
         prompt_template = ChatPromptTemplate.from_messages(
             [
                 (

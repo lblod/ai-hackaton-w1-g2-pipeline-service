@@ -1,10 +1,10 @@
-from enum import StrEnum
-from typing import Optional
+from enum import Enum
+from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
 
-class ActionCategory(StrEnum):
+class ActionCategory(Enum):
     DAK_BUITENMUUR_DAKBEDEKKING_GOOT = "DAK_BUITENMUUR_DAKBEDEKKING_GOOT"
     DAK_BUITENMUUR_AFWERKINGSLAAG_KLEUR = "DAK_BUITENMUUR_AFWERKINGSLAAG_KLEUR"
     DAK_BUITENMUUR_AFWERKINGSLAAG_TEXTUUR = "DAK_BUITENMUUR_AFWERKINGSLAAG_TEXTUUR"
@@ -15,7 +15,7 @@ class ActionCategory(StrEnum):
     INTERIEUR_DECORATIE = "INTERIEUR_DECORATIE"
 
 
-class MeasureType(StrEnum):
+class MeasureType(Enum):
     NEEDS_PERMIT = "NeedsPermit"
     FORBIDDEN = "Forbidden"
     ALLOWED_WITHOUT_PERMIT = "AllowedWithoutPermit"
@@ -30,11 +30,11 @@ class Action(BaseModel):
 
 
 class Actions(BaseModel):
-    allowed_action_list: list[Action] = []
-    not_allowed_action_list: list[Action] = []
+    allowed_action_list: List[Action] = []
+    not_allowed_action_list: List[Action] = []
 
 
 class ActionFragment(BaseModel):
     text_fragment: str
     measure_type: MeasureType
-    category: ActionCategory | None
+    category: Optional[ActionCategory] #tesyt

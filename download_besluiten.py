@@ -1,6 +1,6 @@
 import requests
 from io import BytesIO
-
+from typing import Optional, List
 
 # Base URLs for API requests
 besluiten_base_url = "https://besluiten.onroerenderfgoed.be/besluiten"
@@ -66,7 +66,7 @@ def process_aanduidingsobject_url(aanduidingsobject_url):
         # Step 2: Extract 'besluiten' (decisions) from the object details
         relevant_besluiten = obj_details.get("besluiten", [])
 
-        pdf_bytes_buffers: list[BytesIO] = []
+        pdf_bytes_buffers: List[BytesIO] = []
 
         for besluit in relevant_besluiten:
             besluit_id = besluit.get("id")

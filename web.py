@@ -90,5 +90,15 @@ def save_data(aanduidingsobject, besluit, graph):
                                              besluit_titel=sparql_escape_string(besluit["besluit_titel"])
                                              )
 
-    print(query_string)
     query_result = update(query_string)
+
+    query_template_handelingen = Template("""
+       INSERT DATA {
+            GRAPH $besluit {
+                 $graph
+            }
+         }
+    """)
+    query_string_handelingen = query_template_handelingen.substitute(besluit=sparql_escape_uri(besluit["besluit_url"]), graph=graph)
+    print(query_string_handelingen)
+    query_result = update(query_string_handelingen)

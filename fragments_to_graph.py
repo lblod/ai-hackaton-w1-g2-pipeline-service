@@ -3,6 +3,8 @@ from rdflib.namespace import NamespaceManager, DC, DCTERMS, FOAF, XSD, SKOS, RDF
 
 from actions_extractor.models import ActionFragment
 
+from typing import Optional, List #
+
 # Lookup object for MeasureTypeUri
 measure_type_lookup = {
   'NeedsPermit' : URIRef('http://mu.semte.ch/vocabularies/ext/maatregeltypes/1'),
@@ -11,7 +13,7 @@ measure_type_lookup = {
 }
 
 
-def convert_fragments_to_graph(fragments: list[ActionFragment], aanduidingsobjecturi: str, besluituri: str, besluitpdfuri: str) -> Graph:
+def convert_fragments_to_graph(fragments: List[ActionFragment], aanduidingsobjecturi: str, besluituri: str, besluitpdfuri: str) -> Graph:
     # Create an RDF graph
     graph = Graph()
 
