@@ -19,9 +19,9 @@ class PossibleActionCategories(Enum):
 class Action(BaseModel):
     """"Information about the extracted action"""
     action: Optional[str] = Field(description="The complete text of an action")
-    forbidden: Optional[bool] = Field(description="Is the action forbidden on the heritage property", default=True)
+    forbidden: Optional[bool] = Field(description="Is the action forbidden on the heritage property", default=False)
     permit_needed: Optional[bool] = Field(description="Is a permit needed for this action", default=True)
-    category: Optional[str] = Field(description="Category the action belongs to")
+    category: Optional[str] = Field(description="Category the action belongs to from the predefined list")
 
 
 class Actions(BaseModel):

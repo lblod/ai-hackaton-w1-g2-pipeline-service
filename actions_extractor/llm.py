@@ -10,7 +10,7 @@ class LLMActionsExtractor(ActionsExtractor):
     def __init__(self, model: str ="mistral-nemo", temperature: float = 0.0, base_url: str = "http://ollama:11434") -> None:
         self._llm = ChatOllama(model=model, temperature=temperature, base_url=base_url)
         self._SYSTEM_PROMPT = """"
-            You are now an expert in understanding heritage documents. 
+            You are now an expert in understanding heritage documents and classification of actions. 
             In these documents, you will find many articles and paragraphs that describe various rules and actions that a heritage site owner must comply with.
             Extract all the relevant information you can find to help the heritage site owner understand what action he can or cannot perform.
             In the end, provide all actions that can be performed without a permit, all actions for which he needs a permit, and all actions that cannot be performed at all.
@@ -21,8 +21,8 @@ class LLMActionsExtractor(ActionsExtractor):
             {format_instructions}
             """
         self._USER_PROMPT = """Based on your system prompt retrieve all relevant information from this heritage paper: {paper}.
-For every action also provide what category it belongs to: {action_categories}.
-Return the output as a JSON-object, following this example {format_instructions}."""
+            For every action provide the best fit category from predefined set: {action_categories}.
+            Return the output as a JSON-object, following this example {format_instructions}."""
         self._output_parser = PydanticOutputParser(pydantic_object=Actions)
 
     def extract_actions(self, text: str) -> Actions:
