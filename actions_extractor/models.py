@@ -19,14 +19,13 @@ class PossibleActionCategories(Enum):
 class Action(BaseModel):
     """"Information about the extracted action"""
     action: Optional[str] = Field(description="The complete text of an action")
-    forbidden: Optional[bool] = Field(description="Is the action forbidden on the heritage property", default=False)
+    forbidden: Optional[bool] = Field(description="Is the action forbidden on the heritage property", default=True)
     permit_needed: Optional[bool] = Field(description="Is a permit needed for this action", default=True)
     category: Optional[str] = Field(description="Category the action belongs to")
 
 
 class Actions(BaseModel):
-    allowed_action_list: Optional[List[Action]]
-    not_allowed_action_list: Optional[List[Action]]
+    action_list: Optional[List[Action]]
 
 
 output_parser= PydanticOutputParser(pydantic_object=Actions)
