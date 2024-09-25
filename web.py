@@ -1,6 +1,6 @@
 from string import Template
 from helpers import query, update, generate_uuid
-from escape_helpers import sparql_escape_uri, sparql_escape_datetime
+from escape_helpers import sparql_escape_uri, sparql_escape_datetime, sparql_escape_string
 from datetime import datetime
 from flask import request, jsonify
 
@@ -43,6 +43,7 @@ def save_data(aanduidingsobject):
         INSERT DATA {
           GRAPH <http://mu.semte.ch/graphs/public> {
                $job a cogs:Job;
+                 mu:uuid $uuid;
                  dct:created $created;
                  dct:source $aanduidingsobject;
                  adms:status "Finished";
@@ -52,7 +53,8 @@ def save_data(aanduidingsobject):
         """)
     query_string = query_template.substitute(job=sparql_escape_uri(job_uri),
                                              created=sparql_escape_datetime(created),
-                                             aanduidingsobject=sparql_escape_uri(aanduidingsobject)
+                                             aanduidingsobject=sparql_escape_uri(aanduidingsobject),
+                                             uuid=sparql_escape_string(job_uuid)
                                              )
 
     print(query_string)
