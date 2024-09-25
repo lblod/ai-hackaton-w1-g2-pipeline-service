@@ -18,20 +18,26 @@ def extract():
     data = request.get_json()
     aanduidingsobject = data.get("aanduidingsobject")
     # INSERT MAIN PIPELINE HERE
-    pdf_bytes_buffers = process_aanduidingsobject_url(aanduidingsobject)
+    data = process_aanduidingsobject_url(aanduidingsobject)
+    pdf_bytes_buffers = data["buffers"]
+    besluit = data["meta"]["besluiten"][0]  #that's hard coded demo shit
+    print("Extracted pdfs")
     text = PlainTextExtractor().extract_text(buffer=pdf_bytes_buffers[0])
-    actions = LLMActionsExtractor().extract_actions(text=text)
+    actions = LLMActionsExtractor(base_url = "http://hackathon-ai-2.s.redhost.be:11434").extract_actions(text=text)
 
     # SAVE OUT IN DATABASE
-    save_data(aanduidingsobject)
+    save_data(aanduidingsobject, besluit)
 
     return jsonify({}), 201
 
 
-def save_data(aanduidingsobject):
+def save_data(aanduidingsobject, besluit):
     job_uuid = generate_uuid()
     job_uri = "http://data.lblod.info/hackton/g2/jobs/" + job_uuid
     created = datetime.now()
+
+    besluit_uuid = generate_uuid()
+    aanduidingsobject_uuid = generate_uuid()
 
     query_template = Template("""
         PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -49,13 +55,29 @@ def save_data(aanduidingsobject):
                  dct:source $aanduidingsobject;
                  adms:status "Finished";
                  task:operation <http://data.lblod.info/extract/toelatingsplichtigeHandelingen>.
+
+
+  $aanduidingsobject a <https://inventaris.onroerenderfgoed.be/Aanduidingsobject>;
+    mu:uuid $aanduidingsobject_uuid;
+    <https://inventaris.onroerenderfgoed.be/heeftBesluit>  $besluit.
+
+  $besluit a <http://data.vlaanderen.be/ns/besluit#Besluit>;
+    dcterms:title $besluit_titel ;
+    mu:uuid $besluit_uuid;
+    <https://id.erfgoed.net/vocab/ontology#dateBetekend> $besluit_date.
+
           }
         }
         """)
     query_string = query_template.substitute(job=sparql_escape_uri(job_uri),
                                              created=sparql_escape_datetime(created),
                                              aanduidingsobject=sparql_escape_uri(aanduidingsobject),
-                                             uuid=sparql_escape_string(job_uuid)
+                                             uuid=sparql_escape_string(job_uuid),
+                                             besluit=sparql_escape_uri(besluit["besluit_url"]),
+                                             aanduidingsobject_uuid=sparql_escape_string(aanduidingsobject_uuid),
+                                             besluit_uuid=sparql_escape_string(besluit_uuid),
+                                             besluit_date=sparql_escape_datetime(besluit["besluit_date"]),
+                                             besluit_titel=sparql_escape_string(besluit["besluit_titel"])
                                              )
 
     print(query_string)
