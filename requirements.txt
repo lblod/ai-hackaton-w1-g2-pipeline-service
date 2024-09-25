@@ -1,2 +1,8 @@
 requests
 pypdf
+pydantic
+
+# LLM
+langchain
+langchain-community
+langchain-ollama

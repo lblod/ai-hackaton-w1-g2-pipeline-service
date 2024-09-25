@@ -5,7 +5,8 @@ from datetime import datetime
 from flask import request, jsonify
 
 from download_besluiten import process_aanduidingsobject_url
-from extract_text import extract_text
+from text_extractor import PlainTextExtractor
+from actions_extractor import LLMActionsExtractor
 
 @app.route("/hello")
 def hello():
@@ -18,8 +19,8 @@ def extract():
     aanduidingsobject = data.get("aanduidingsobject")
     # INSERT MAIN PIPELINE HERE
     pdf_bytes_buffers = process_aanduidingsobject_url(aanduidingsobject)
-    for pdf_bytes in pdf_bytes_buffers:
-        text = extract_text(pdf_bytes)
+    text = PlainTextExtractor().extract_text(buffer=pdf_bytes_buffers[0])
+    actions = LLMActionsExtractor().extract_actions(text=text)
 
     # SAVE OUT IN DATABASE
     save_data(aanduidingsobject)
