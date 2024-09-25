@@ -7,6 +7,7 @@ from flask import request, jsonify
 from download_besluiten import process_aanduidingsobject_url
 from text_extractor import PlainTextExtractor
 from actions_extractor import LLMActionsExtractor
+from fragments_to_graph import convert_fragments_to_graph
 
 import os
 
@@ -31,14 +32,16 @@ def extract():
     print("Extracted pdfs")
     text = PlainTextExtractor().extract_text(buffer=pdf_bytes_buffers[0])
     actions = LLMActionsExtractor(base_url = LLM_ENDPOINT).extract_actions(text=text)
+    graph = convert_fragments_to_graph(actions, aanduidingsobject, besluituri=data["meta"]["besluiten"][0]["besluit_url"], besluitpdfuri=data["meta"]["besluiten"][0]["besluit_pdf_url"])
+
 
     # SAVE OUT IN DATABASE
-    save_data(aanduidingsobject, besluit)
+    save_data(aanduidingsobject, besluit, graph)
 
     return jsonify({}), 201
 
 
-def save_data(aanduidingsobject, besluit):
+def save_data(aanduidingsobject, besluit, graph):
     job_uuid = generate_uuid()
     job_uri = "http://data.lblod.info/hackton/g2/jobs/" + job_uuid
     created = datetime.now()
