@@ -3,7 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 
 from actions_extractor.base import ActionsExtractor
-from actions_extractor.models import Actions
+from actions_extractor.models import Actions, PossibleActionCategories
 
 
 class LLMActionsExtractor(ActionsExtractor):
@@ -20,8 +20,9 @@ class LLMActionsExtractor(ActionsExtractor):
             Very important that you ALWAYS use this output structure:
             {format_instructions}
             """
-        self._USER_PROMPT = """Haal op basis van de systeeminstructies de acties uit dit erfgoeddocument: {paper}. 
-            Retourneer het resultaat als een JSON-object, volgens dit voorbeeld {format_instructions}."""
+        self._USER_PROMPT = """Based on your system prompt retrieve all relevant information from this heritage paper: {paper}.
+For every action also provide what category it belongs to: {action_categories}.
+Return the output as a JSON-object, following this example {format_instructions}."""
         self._output_parser = PydanticOutputParser(pydantic_object=Actions)
 
     def extract_actions(self, text: str) -> Actions:
@@ -35,25 +36,14 @@ class LLMActionsExtractor(ActionsExtractor):
             ]
         ).partial(format_instructions=self._output_parser.get_format_instructions())
         chain = prompt_template | self._llm | self._output_parser
-        actions = chain.invoke({"paper": text})
+        actions = chain.invoke({"paper": text, "action_categories": [e.value for e in PossibleActionCategories]})
 
-        return actions
+        all_actions_data = [
+            {'TextFragment': action_item.action, 'Forbidden': action_item.forbidden,
+             'PermitNeeded': action_item.permit_needed, 'Category': action_item.category}
+            for action_item in actions.action_list
+        ]
 
-        allowed_actions_data = []
-        if actions.allowed_action_list:
-            allowed_actions_data = [
-                {'TextFragment': allowed_action.action, 'Forbidden': False, 'PermitNeeded': allowed_action.permit_needed}
-                for allowed_action in actions.allowed_action_list
-            ]
-
-        not_allowed_actions_data = []
-        if actions.not_allowed_action_list:
-            not_allowed_actions_data = [
-                {'TextFragment': not_allowed_action.action, 'Forbidden': True, 'PermitNeeded':  not_allowed_action.permit_needed}
-                for not_allowed_action in actions.not_allowed_action_list
-            ]
-        # Combine both lists
-        all_actions_data = allowed_actions_data + not_allowed_actions_data
         filtered_data = [item for item in all_actions_data if item['TextFragment'] is not None]
 
         csv_file = OUTPUT_DIR / 'actions_some_besluit.csv'
