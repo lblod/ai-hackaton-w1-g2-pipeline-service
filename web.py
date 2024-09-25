@@ -8,6 +8,13 @@ from download_besluiten import process_aanduidingsobject_url
 from text_extractor import PlainTextExtractor
 from actions_extractor import LLMActionsExtractor
 
+import os
+
+LLM_ENDPOINT = "http://ollama:11434"
+
+if os.getenv('LLM_ENDPOINT'):
+   LLM_ENDPOINT = os.getenv('LLM_ENDPOINT')
+
 @app.route("/hello")
 def hello():
     return "Hello from the mu-python-template!"
@@ -23,7 +30,7 @@ def extract():
     besluit = data["meta"]["besluiten"][0]  #that's hard coded demo shit
     print("Extracted pdfs")
     text = PlainTextExtractor().extract_text(buffer=pdf_bytes_buffers[0])
-    actions = LLMActionsExtractor(base_url = "http://hackathon-ai-2.s.redhost.be:11434").extract_actions(text=text)
+    actions = LLMActionsExtractor(base_url = LLM_ENDPOINT).extract_actions(text=text)
 
     # SAVE OUT IN DATABASE
     save_data(aanduidingsobject, besluit)
